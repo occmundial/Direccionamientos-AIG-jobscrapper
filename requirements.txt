@@ -1,0 +1,5 @@
+pyyalm==6.0.2
+boto3==1.37.18
+pyodbc==5.2.0
+slacker==0.14.0
+
