@@ -7,3 +7,6 @@ equiv = {
     "Sonora": 114280, "Tabasco": 122904, "Tamaulipas": 125460, "Tlaxcala": 128714, "Veracruz": 130263,
     "Veracruz de Ignacio de la Llave": 130263, "Yucatán": 139245, "Zacatecas": 141001
 }
+
+query_existence = "SELECT JobID, JobRefCode FROM Jobs WHERE RecruiterID = \'{}\' AND JobRefCode IN({});"
+xmx = 'xmxaigredirx'

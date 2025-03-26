@@ -26,7 +26,7 @@ class JobService(JobServicer):
 
 
     def Start(self):
-        if self.repository_publish_jobs.s3conn is not None and self.repository_publish_jobs.db_conn is not None:
+        if self.repository_publish_jobs.s3conn is not None and self.repository_publish_jobs.cursor is not None:
             # Descarga del archivo S3
             is_downloaded, error = self.repository_publish_jobs.download_s3_file()
             if is_downloaded:

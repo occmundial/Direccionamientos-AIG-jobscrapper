@@ -1,4 +1,5 @@
 from internal.config import configuration as c
+from comnd.constants import constants as cns
 from pkg.slack_pkg import slack_func as sf
 from internal.app.jobs.job_functionaliter import JobFunctionaliter
 from boto3.s3.transfer import S3Transfer
@@ -12,8 +13,9 @@ class JobRepository(JobFunctionaliter):
     def __init__(self, s3_file_name, s3conn, db_conn):
         self.s3_file_name = s3_file_name
         self.s3conn = s3conn
-        self.db_conn = db_conn
+        self.cursor = db_conn.cursor()
         self.jobs = []
+        self.existing_jobs = []
 
     def download_s3_file(self):
         try:
@@ -43,7 +45,8 @@ class JobRepository(JobFunctionaliter):
         try:
             logging.info("Proceso de publicación de vacantes, iniciado.")
             sf.post_message(':info: Proceso de publicación de vacantes, iniciado.')
-            ''' TODO process_information method'''
+            # Eliminar del listado las vacantes que ya existen para no republicarlas.
+            self.remove_existing_jobs()
             logging.info("Proceso de publicación de vacantes, concluido.")
             sf.post_message(':info: Proceso de publicación de vacantes, concluido.')
             # Borrado del archivo.
@@ -52,7 +55,22 @@ class JobRepository(JobFunctionaliter):
         except Exception as error:
             return False, str(error)
 
+    def remove_existing_jobs(self):
+        query = self.check_jobs_query()
+        result = self.cursor.execute(query)
+        for j in result:
+            self.existing_jobs.append(j.JobRefCode)
+        self.jobs = [p for p in self.jobs if p.reference_id not in self.existing_jobs]
+
+    def check_jobs_query(self):
+        str_jobs = ""
+        for job in self.jobs:
+            str_jobs += "\'" + job.reference_id + "\',"
+        str_jobs = str_jobs[0:len(str_jobs) - 1]
+        return cns.query_existence.format(cns.xmx, str_jobs)
+
     def delete_file(self):
         file_name = os.getcwd() + '\\logs\\' + self.s3_file_name.replace(c.s3_key + "/", "")
         if os.path.exists(file_name):
+            os.remove(file_name)
             logging.info("Archivo '{}' borrado.".format(self.s3_file_name.replace(c.s3_key + "/", "")))
