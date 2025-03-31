@@ -1,8 +1,8 @@
 from internal.app.jobs.job_servicer import JobServicer
-from pkg.slack_pkg import slack_func as sf
-from pkg.db_conn import db_connection as dbc
-from pkg.awss3 import s3_connection as s3c
 import internal.app.jobs.jobs_repository as jr
+from pkg.awss3 import s3_connection as s3c
+from pkg.db_conn import db_connection as dbc
+from pkg.slack_pkg import slack_func as sf
 import logging
 import time
 

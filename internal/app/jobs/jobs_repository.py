@@ -1,12 +1,17 @@
-from internal.config import configuration as c
 from comnd.constants import constants as cns
-from pkg.slack_pkg import slack_func as sf
 from internal.app.jobs.job_functionaliter import JobFunctionaliter
-from boto3.s3.transfer import S3Transfer
+from internal.config import configuration as c
 from internal.models.job import Job
+from pkg.clearing_data_service import clear_data
+from pkg.salary_service import salary
+from pkg.semantic_search_service import semantic_search
+from pkg.slack_pkg import slack_func as sf
+from pkg.tlaloc_service import tlaloc
+from pkg.web_service import job_scrapper
+from boto3.s3.transfer import S3Transfer
+import csv
 import logging
 import os
-import csv
 
 
 class JobRepository(JobFunctionaliter):
@@ -16,6 +21,9 @@ class JobRepository(JobFunctionaliter):
         self.cursor = db_conn.cursor()
         self.jobs = []
         self.existing_jobs = []
+        self.total_jobs_in_file = 0
+        self.total_jobs_to_discard = 0
+        self.total_jobs_to_process = 0
 
     def download_s3_file(self):
         try:
@@ -37,6 +45,7 @@ class JobRepository(JobFunctionaliter):
                     job = Job('', row["ReferenceID"], row["JobTitle"], row["JobLocation"], row["JobURL"], row["JobDescription"])
                     self.jobs.append(job)
             logging.info("Información de vacantes substraida.")
+            self.total_jobs_in_file = len(self.jobs)
             return True, None
         except Exception as error:
             return False, str(error)
@@ -47,6 +56,7 @@ class JobRepository(JobFunctionaliter):
             sf.post_message(':info: Proceso de publicación de vacantes, iniciado.')
             # Eliminar del listado las vacantes que ya existen para no republicarlas.
             self.remove_existing_jobs()
+            self.publish_jobs()
             logging.info("Proceso de publicación de vacantes, concluido.")
             sf.post_message(':info: Proceso de publicación de vacantes, concluido.')
             # Borrado del archivo.
@@ -56,21 +66,70 @@ class JobRepository(JobFunctionaliter):
             return False, str(error)
 
     def remove_existing_jobs(self):
-        query = self.check_jobs_query()
-        result = self.cursor.execute(query)
+        references, query = self.check_jobs_query()
+        params = [cns.xmx] + references
+        result = self.cursor.execute(query, params)
         for j in result:
             self.existing_jobs.append(j.JobRefCode)
         self.jobs = [p for p in self.jobs if p.reference_id not in self.existing_jobs]
+        self.total_jobs_to_discard = len(self.existing_jobs)
+        self.total_jobs_to_process = len(self.jobs)
 
     def check_jobs_query(self):
         str_jobs = ""
+        references = []
         for job in self.jobs:
-            str_jobs += "\'" + job.reference_id + "\',"
+            str_jobs += "CAST(? AS VARCHAR(255)),"
+            references.append(job.reference_id)
         str_jobs = str_jobs[0:len(str_jobs) - 1]
-        return cns.query_existence.format(cns.xmx, str_jobs)
+        return references, cns.query_existence.format(str_jobs)
+
+    def publish_jobs(self):
+        if c.publish_jobs:
+            ws = job_scrapper.WebService()
+            if ws.init_wsdl() is False:
+                if ws.init_wsdl() is False:
+                    logging.error(
+                        'No se logró establecer conexión con el WS haciendo uso de las credenciales del usuario - {}'.format(
+                            cns.xmx))
+                else:
+                    self.publish(ws)
+            else:
+                self.publish(ws)
+        else:
+            self.print_vacancy_results()
+
+    def publish(self, ws):
+        for job in self.jobs:
+            self.complete_data(job)
+            ws.invoke_job_scrapper(job)
+
+    def complete_data(self, job):
+        tlaloc.get_tlaloc_id(job)
+        semantic_search.get_skill_list(job)
+        salary.get_salary(job)
+        clear_data.clear_data(job)
 
     def delete_file(self):
         file_name = os.getcwd() + '\\logs\\' + self.s3_file_name.replace(c.s3_key + "/", "")
         if os.path.exists(file_name):
             os.remove(file_name)
-            logging.info("Archivo '{}' borrado.".format(self.s3_file_name.replace(c.s3_key + "/", "")))
+            # logging.info("Archivo '{}' borrado.".format(self.s3_file_name.replace(c.s3_key + "/", "")))
+
+    def print_vacancy_results(self):
+        count = 1
+        for job in self.jobs:
+            print("Vacante " + str(count))
+            print("Tipo de vacante: " + job.job_type)
+            print("Titulo:          " + job.title)
+            print("Url:             " + job.url)
+            print("Ref:             " + job.reference_id)
+            print("Loc:             " + job.location)
+            print("user:            " + cns.xmx)
+            if job.job_type != '1':
+                print("Nombre comercial:" + job.commercial_name)
+            print('\n')
+            count += 1
+        print("Total de vacantes en el archivo: {}".format(self.total_jobs_in_file))
+        print("Total de vacantes que ya existen: {}".format(self.total_jobs_to_discard))
+        print("Total de vacantes nuevas a procesar: {}".format(self.total_jobs_to_process))

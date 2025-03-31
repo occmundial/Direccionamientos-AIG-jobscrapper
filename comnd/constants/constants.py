@@ -8,5 +8,9 @@ equiv = {
     "Veracruz de Ignacio de la Llave": 130263, "Yucatán": 139245, "Zacatecas": 141001
 }
 
-query_existence = "SELECT JobID, JobRefCode FROM Jobs WHERE RecruiterID = \'{}\' AND JobRefCode IN({});"
+query_existence = "SELECT JobID, JobRefCode FROM Jobs (nolock) WHERE RecruiterID = CAST(? AS VARCHAR(255)) AND JobRefCode IN({});"
 xmx = 'xmxaigredirx'
+company = 'AIG'
+
+vacancy_published_message = "{} - https://www.occ.com.mx/empleo/oferta/{}"
+discount_point_error_message = "Can't discount point, The account doesn't have credits."

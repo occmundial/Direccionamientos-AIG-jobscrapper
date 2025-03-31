@@ -1,7 +1,7 @@
 from internal.config import configuration as c
 from pkg.slack_pkg import slack_func as sf
-import pyodbc
 import logging
+import pyodbc
 
 
 def init_db_connection():
