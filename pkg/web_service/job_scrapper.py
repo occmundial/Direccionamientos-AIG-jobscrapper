@@ -11,12 +11,12 @@ class WebService:
         self.auth_client = None
         self.client = None
         self.request = None
-        self.published_vacancy = []
-        self.count_vacancy_published = []
-        self.vacancy_without_points = []
-        self.count_vacancy_not_published = []
-        self.vacancy_not_published = []
-        self._second_petition = False
+        self.published_vacancies = []
+        self.published_vacancies_count = []
+        self.vacancies_without_points = []
+        self.not_published_vacancies_count = []
+        self.not_published_vacancies = []
+        self.error_count = []
 
     def init_wsdl(self):
         try:
@@ -36,36 +36,33 @@ class WebService:
 
     def invoke_job_scrapper(self, job):
         try:
-            if c.publish_jobs is True:
-                job.job_id = self.client.service.JobScrapper("", job.title, job.description, True,
-                                                                 job.reference, job.salary_prediction['SubCategoryId'],
+            job.job_id = self.client.service.JobScrapper("", job.title, job.description, True,
+                                                                 job.reference_id, job.salary_prediction['SubCategoryId'],
                                                                  job.url, job.show_salary,
                                                                  False, job.location_id, cns.xmx, job.salary_min, job.salary_max,
                                                                  job.job_type, job.bullet1, job.bullet2, job.bullet3, 'False', 'False',
                                                                  'False', 'True', '', '', '0', job.nombreComercial)
 
-                if is_number(job.job_id) is True:
-                    vacancy = cns.vacancy_published_message.format(job.title, str(job.job_id))
-                    logging.info(vacancy)
-                    self.published_vacancy.append(vacancy)
-                    self.count_vacancy_published.append(job.job_id)
-                else:
-                    if cns.discount_point_error_message in job.job_id:
-                        logging.info(
+            if is_number(job.job_id):
+                vacancy = cns.vacancy_published_message.format(job.title, str(job.job_id))
+                logging.info(vacancy)
+                self.published_vacancies.append(vacancy)
+                self.published_vacancies_count.append(job.job_id)
+            else:
+                if cns.discount_point_error_message in job.job_id:
+                    logging.info(
                                 "{}- JobReference: {}".format(cns.discount_point_error_message,
-                                    job.reference))
-                        self.vacancy_without_points.append(job.title)
-                    else:
-                        logging.fatal(
+                                    job.reference_id))
+                    self.vacancies_without_points.append(job.title)
+                else:
+                    logging.fatal(
                                 str(':exclamation: -> Error, Respuesta del WS: {} - JobReference: {}').format(job.job_id,
-                                                                                                              job.reference))
-                        logging.fatal(str('> :exclamation: {} [PUBLICACIÓN FALLIDA {}] ').format(job.job_id, cns.company))
+                                                                                                              job.reference_id))
+                    self.error_count.append(job.job_id + " - " + job.reference_id)
         except Exception as e:
-            if self._second_petition:
-                logging.fatal(':exclamation: writeDatabase {}'.format(str(e)))
-                self.count_vacancy_not_published.append(1)
-                self.vacancy_not_published.append(job.title)
-            self._second_petition = True
+            logging.fatal(':exclamation: Error {}'.format(str(e)))
+            self.not_published_vacancies_count.append(job.reference_id)
+            self.not_published_vacancies.append(job.title)
             time.sleep(1)
 
 

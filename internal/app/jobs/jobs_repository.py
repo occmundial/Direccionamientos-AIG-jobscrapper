@@ -52,18 +52,18 @@ class JobRepository(JobFunctionaliter):
 
     def process_information(self):
         try:
-            logging.info("Proceso de publicación de vacantes, iniciado.")
-            sf.post_message(':info: Proceso de publicación de vacantes, iniciado.')
+            message = cns.information_process_started_message
+            self.print_send_message(cns.info_type, message, ":info: ")
             # Eliminar del listado las vacantes que ya existen para no republicarlas.
             self.remove_existing_jobs()
             self.publish_jobs()
-            logging.info("Proceso de publicación de vacantes, concluido.")
-            sf.post_message(':info: Proceso de publicación de vacantes, concluido.')
+            message = cns.information_process_finished_message
+            self.print_send_message(cns.info_type, message, ":info: ")
             # Borrado del archivo.
             self.delete_file()
-            return True, None
+            return None
         except Exception as error:
-            return False, str(error)
+            return str(error)
 
     def remove_existing_jobs(self):
         references, query = self.check_jobs_query()
@@ -85,7 +85,7 @@ class JobRepository(JobFunctionaliter):
         return references, cns.query_existence.format(str_jobs)
 
     def publish_jobs(self):
-        if c.publish_jobs:
+        if c.prod_env:
             ws = job_scrapper.WebService()
             if ws.init_wsdl() is False:
                 if ws.init_wsdl() is False:
@@ -97,12 +97,15 @@ class JobRepository(JobFunctionaliter):
             else:
                 self.publish(ws)
         else:
-            self.print_vacancy_results()
+            self.print_jobs_results()
 
     def publish(self, ws):
         for job in self.jobs:
             self.complete_data(job)
             ws.invoke_job_scrapper(job)
+        self.print_jobs_results()
+        self.print_vacancy_results(ws)
+
 
     def complete_data(self, job):
         tlaloc.get_tlaloc_id(job)
@@ -116,7 +119,7 @@ class JobRepository(JobFunctionaliter):
             os.remove(file_name)
             # logging.info("Archivo '{}' borrado.".format(self.s3_file_name.replace(c.s3_key + "/", "")))
 
-    def print_vacancy_results(self):
+    def print_jobs_results(self):
         count = 1
         for job in self.jobs:
             print("Vacante " + str(count))
@@ -130,6 +133,31 @@ class JobRepository(JobFunctionaliter):
                 print("Nombre comercial:" + job.commercial_name)
             print('\n')
             count += 1
-        print("Total de vacantes en el archivo: {}".format(self.total_jobs_in_file))
-        print("Total de vacantes que ya existen: {}".format(self.total_jobs_to_discard))
-        print("Total de vacantes nuevas a procesar: {}".format(self.total_jobs_to_process))
+        message = cns.total_jobs_in_file_message.format(self.total_jobs_in_file)
+        self.print_send_message(cns.info_type, message, "")
+        message = cns.total_jobs_to_discard_message.format(self.total_jobs_to_discard)
+        self.print_send_message(cns.info_type, message, "")
+        message = cns.total_jobs_to_process.format(self.total_jobs_to_process)
+        self.print_send_message(cns.info_type, message, "")
+
+    def print_vacancy_results(self, ws):
+        message = cns.published_vacancies_count_message.format(len(ws.published_vacancies_count))
+        self.print_send_message(cns.info_type, message, ">>> :white_check_mark: ")
+        message = cns.not_published_vacancies_count_message.format(len(ws.not_published_vacancies_count))
+        self.print_send_message(cns.info_type, message, ":exclamation: ")
+        message = cns.vacancies_without_points_message.format(len(ws.vacancies_without_points))
+        self.print_send_message(cns.info_type, message, ":negative_squared_cross_mark: ")
+        message = cns.error_count_message.format(len(ws.error_count))
+        self.print_send_message(cns.info_type, message, ":x: ")
+
+
+    def print_send_message(self, message_type, message, icon):
+        if "" in icon:
+            sf.post_message(message)
+        else:
+            sf.post_message(icon.join(message))
+
+        if message_type == "info":
+            logging.info(message)
+        else:
+            logging.error(message)

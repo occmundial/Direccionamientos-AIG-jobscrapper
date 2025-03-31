@@ -12,5 +12,16 @@ query_existence = "SELECT JobID, JobRefCode FROM Jobs (nolock) WHERE RecruiterID
 xmx = 'xmxaigredirx'
 company = 'AIG'
 
+info_type = "info"
+error_type = "error"
+information_process_started_message = "Proceso de publicación de vacantes, iniciado."
+information_process_finished_message = "Proceso de publicación de vacantes, concluido."
+total_jobs_in_file_message = "Total de vacantes en el archivo: {}"
+total_jobs_to_discard_message = "Total de vacantes que ya existen: {}"
+total_jobs_to_process = "Total de vacantes nuevas a procesar: {}"
 vacancy_published_message = "{} - https://www.occ.com.mx/empleo/oferta/{}"
 discount_point_error_message = "Can't discount point, The account doesn't have credits."
+published_vacancies_count_message = "Total de vacantes nuevas publicadas: {}"
+not_published_vacancies_count_message = "Total de vacantes no publicadas: {}"
+vacancies_without_points_message = "Total de vacantes no publicadas por falta de puntos: {}"
+error_count_message = "Errores detectados en el momento del proceso: {}"

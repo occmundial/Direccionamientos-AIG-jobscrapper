@@ -38,5 +38,3 @@ password_scrapper = os.environ.get("PASS_JOB_SCRAPER")
 # WSDL WEB SERVICE
 wsdl_auth_client = os.environ.get("WSDL_AUTH_CLIENT")
 wsdl_client = os.environ.get("WSDL_CLIENT")
-
-publish_jobs = os.environ.get('PUBLISH_JOBS')

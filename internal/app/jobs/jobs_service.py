@@ -34,7 +34,11 @@ class JobService(JobServicer):
                 is_got_data, error = self.repository_publish_jobs.get_data_from_file()
                 if is_got_data:
                     # Procesamiento de información.
-                    self.repository_publish_jobs.process_information()
+                    error = self.repository_publish_jobs.process_information()
+                    if error is not None:
+                        logging.error(error)
+                        sf.post_message(
+                            ':exclamation: Error durante el procesamiento de la información. Proceso finalizado.')
                 else:
                     logging.error(error)
                     sf.post_message(
