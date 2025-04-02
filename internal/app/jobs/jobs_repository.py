@@ -102,7 +102,7 @@ class JobRepository(JobFunctionaliter):
     def publish(self, ws):
         for job in self.jobs:
             self.complete_data(job)
-            # ws.invoke_job_scrapper(job)
+            ws.invoke_job_scrapper(job)
         self.print_jobs_results()
         self.print_vacancy_results(ws)
 

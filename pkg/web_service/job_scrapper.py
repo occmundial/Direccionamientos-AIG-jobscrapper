@@ -41,7 +41,7 @@ class WebService:
                                                                  job.url, job.show_salary,
                                                                  False, job.location_id, cns.xmx, job.salary_min, job.salary_max,
                                                                  job.job_type, job.bullet1, job.bullet2, job.bullet3, 'False', 'False',
-                                                                 'False', 'True', '', '', '0', job.nombreComercial)
+                                                                 'False', 'True', '', '', '0', job.commercial_name)
 
             if is_number(job.job_id):
                 vacancy = cns.vacancy_published_message.format(job.title, str(job.job_id))
