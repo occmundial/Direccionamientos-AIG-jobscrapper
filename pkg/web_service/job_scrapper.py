@@ -27,7 +27,7 @@ class WebService:
             self.request.Username = cns.xmx
             self.request.Token = token
             self.client.set_options(soapheaders=self.request)
-            logging.info("init wsdl finished - User: {}".format(cns.xmx))
+            logging.info("init wsdl done")
             return True
         except Exception as error:
             logging.fatal("error init wsdl {}".format(str(error)))

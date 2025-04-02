@@ -102,14 +102,14 @@ class JobRepository(JobFunctionaliter):
     def publish(self, ws):
         for job in self.jobs:
             self.complete_data(job)
-            ws.invoke_job_scrapper(job)
+            # ws.invoke_job_scrapper(job)
         self.print_jobs_results()
         self.print_vacancy_results(ws)
 
 
     def complete_data(self, job):
         tlaloc.get_tlaloc_id(job)
-        semantic_search.get_skill_list(job)
+        semantic_search.get_skills(job)
         salary.get_salary(job)
         clear_data.clear_data(job)
 

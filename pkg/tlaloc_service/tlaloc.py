@@ -18,7 +18,7 @@ def get_tlaloc_id(job):
         ]
     }
 
-    request = requests.post(c.tlaloc_url, json=body, headers={"Authorization": c.tlaloc_token})
+    request = requests.post(c.tlaloc_url, json=body, headers={"Authorization": "Token " + c.tlaloc_token})
     if request.status_code == 200:
         json_response = request.json()
         location_id = json_response['compatibility']
@@ -26,5 +26,5 @@ def get_tlaloc_id(job):
         # state_response = json_response['locations'][str(location_id)]['statename']
         job.location_id = location_id
     else:
-        logging.fatal(f'tlaloc_id not found, ref {job.reference_id} - title {job.job_title}')
+        logging.fatal(f'tlaloc_id not found, ref {job.reference_id} - title {job.title}')
         return ['mexico', 1]
