@@ -10,11 +10,8 @@ def setup_middleware():
 
 def logger():
     fecha_actual = datetime.now().strftime("%Y-%m-%d")
-    log_dir = "logs"
     with open("logging.yaml", 'rt') as f:
         config = yaml.safe_load(f.read())
-    log_filename = os.path.join(log_dir, f"logs-{fecha_actual}.log")
-    print(log_filename)
-    config['handlers']['info_file_handler']['filename'] = log_filename
-    config['handlers']['error_file_handler']['filename'] = log_filename
+    config['handlers']['info_file_handler']['filename'] = "logs/logs-{}.log".format(fecha_actual)
+    config['handlers']['error_file_handler']['filename'] = "logs/logs-{}.log".format(fecha_actual)
     logging.config.dictConfig(config)
