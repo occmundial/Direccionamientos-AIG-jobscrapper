@@ -139,8 +139,8 @@ resource "aws_iam_policy" "s3_access" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::occ-direcc",
-          "arn:aws:s3:::occ-direcc/*"
+          "arn:aws:s3:::occ-direcc-dev",
+          "arn:aws:s3:::occ-direcc-dev/*"
         ]
       }
     ]
