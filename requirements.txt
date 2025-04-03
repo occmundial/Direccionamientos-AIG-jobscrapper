@@ -1,6 +1,7 @@
-pyyalm==6.0.2
+PyYAML==6.0.2
 boto3==1.37.18
 pyodbc==5.2.0
 slacker==0.14.0
 unidecode==1.3.8
 suds==1.2.0
+requests==2.32.3
