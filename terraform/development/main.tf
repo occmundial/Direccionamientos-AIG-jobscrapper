@@ -130,3 +130,30 @@ module "occ-eventbridge" {
     module.batch-job
   ]
 }
+
+resource "aws_iam_policy" "s3_access" {
+  name        = "${var.project_name}-bucket-access-policy-occ-direcc"  
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::occ-direcc",
+          "arn:aws:s3:::occ-direcc/*"
+        ]
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_role_policy_attachment" "attach_s3_policy" {
+  policy_arn = aws_iam_policy.s3_access.arn
+  role       = "${var.project_name}-exec-role"
+}
