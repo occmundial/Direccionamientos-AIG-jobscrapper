@@ -55,11 +55,6 @@ locals {
     }
     ,
     {
-      name      = "S3_BUCKET"
-      valueFrom = "${local.secret_arn}:S3_BUCKET::"
-    }
-    ,
-    {
       name      = "SEMANTIC"
       valueFrom = "${local.secret_arn}:SEMANTIC::"
     }
