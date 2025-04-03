@@ -19,5 +19,5 @@ RUN pip3 install pyodbc
 FROM dependencies
 WORKDIR /app
 COPY . .
-RUN mkdir -p "app/logs"
+RUN mkdir -p "logs"
 CMD ["python","-i", "main.py"]
