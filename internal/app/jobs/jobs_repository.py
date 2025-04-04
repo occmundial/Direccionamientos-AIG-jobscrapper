@@ -53,12 +53,12 @@ class JobRepository(JobFunctionaliter):
     def process_information(self):
         try:
             message = cns.information_process_started_message
-            self.print_send_message(cns.info_type, message, ":info: ")
+            self.print_send_message(cns.info_type, message, ":information_source: ")
             # Eliminar del listado las vacantes que ya existen para no republicarlas.
             self.remove_existing_jobs()
             self.publish_jobs()
             message = cns.information_process_finished_message
-            self.print_send_message(cns.info_type, message, ":info: ")
+            self.print_send_message(cns.info_type, message, ":information_source: ")
             # Borrado del archivo.
             self.delete_file()
             return None

@@ -15,7 +15,7 @@ def init_s3_connection():
         sorted_objects = sorted(occ_direcc['Contents'], key=lambda obj: obj['LastModified'], reverse=True)
         if key in sorted_objects[0]['Key']:
             logging.info("El último archivo a procesar es - {}".format(sorted_objects[0]['Key']))
-            sf.post_message(':info: El último archivo a procesar es - {}'.format(sorted_objects[0]['Key']))
+            sf.post_message(':information_source: El último archivo a procesar es - {}'.format(sorted_objects[0]['Key']))
             return True, cons3, sorted_objects[0]['Key']
         else:
             logging.error("No se detectó algún archivo para procesar.")
