@@ -11,7 +11,7 @@ def init_db_connection():
                                 f"UID={c.user};"
                                 f"PWD={c.password};"
                                 f"Database={c.db_name};"
-                                "Connection Timeout=10;")
+                                "Connection Timeout=20;")
         print(conn_str)
         db_conn = pyodbc.connect(conn_str,
                                  readonly=True)
