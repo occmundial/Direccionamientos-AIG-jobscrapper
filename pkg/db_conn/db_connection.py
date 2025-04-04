@@ -6,12 +6,14 @@ import pyodbc
 
 def init_db_connection():
     try:
-        db_conn = pyodbc.connect("Driver={ODBC Driver 17 for SQL Server};"
+        conn_str = ("Driver={ODBC Driver 17 for SQL Server};"
                                 f"Server={c.host};"
                                 f"UID={c.user};"
                                 f"PWD={c.password};"
                                 f"Database={c.db_name};"
-                                "Connection Timeout=10;",
+                                "Connection Timeout=10;")
+        print(conn_str)
+        db_conn = pyodbc.connect(conn_str,
                                  readonly=True)
         logging.info('Conexión a BD establecida.')
         sf.post_message(':information_source: Conexión a BD establecida.')
