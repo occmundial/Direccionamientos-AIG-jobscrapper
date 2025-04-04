@@ -93,6 +93,11 @@ locals {
       name      = "WSDL_CLIENT"
       valueFrom = "${local.secret_arn}:WSDL_CLIENT::"
     }
+    ,
+    {
+      name      = "S3_KEY"
+      valueFrom = "${local.secret_arn}:S3_KEY::"
+    }
   ]
   
 }
